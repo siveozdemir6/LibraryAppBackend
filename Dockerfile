@@ -1,34 +1,18 @@
-# FROM maven AS build
-
-# WORKDIR /app
-
-# COPY ./pom.xml /app
-# COPY ./src /app/src
-
-# RUN mvn clean package -Dmaven.test.skip=true
-
-# FROM openjdk
-
-# WORKDIR /app
-
-# COPY --from=build /app/target/*.jar app.jar
-
-# EXPOSE 8080
-
-# CMD ["java", "-jar", "app.jar"]
-# ---- Build stage ----
+# Build stage
 FROM maven:3.8.8-eclipse-temurin-17 AS build
 WORKDIR /app
 
-# Bağımlılık cache'i
 COPY pom.xml .
-RUN mvn clean package -Dmaven.test.skip=true
+COPY src ./src
 
-# Kod
-FROM openjdk
+RUN mvn clean package -DskipTests
+
+# Run stage
+FROM eclipse-temurin:17-jdk
 WORKDIR /app
 
-# Derleme
-RUN mvn clean package -DskipTests
 COPY --from=build /app/target/*.jar app.jar
+
 EXPOSE 8080
+
+CMD ["java", "-jar", "app.jar"]
