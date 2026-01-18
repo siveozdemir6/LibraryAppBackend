@@ -40,15 +40,17 @@ public class AuthorService {
 
         Optional<Author> authorFromDb = authorRepository.findById(id);
 
-        Optional<Author> isAuthorExist = authorRepository.findByNameAndBirthDateAndCountry(request.getName(), request.getBirthDate(), request.getCountry());
-
         if (authorFromDb.isEmpty()) {
             throw new RuntimeException(id + "Güncellemeye çalıştığınız yazar sistemde bulunamadı. !!!.");
         }
 
-        if (isAuthorExist.isPresent()) {
+        Optional<Author> isAuthorExist = authorRepository.findByNameAndBirthDateAndCountry(request.getName(), request.getBirthDate(), request.getCountry());
+
+        // Check if another author (not the current one) has the same name, birth date and country
+        if (isAuthorExist.isPresent() && !isAuthorExist.get().getId().equals(id)) {
             throw new RuntimeException("Bu yazar daha önce sisteme kayıt olmuştur !!!");
         }
+
         Author author = authorFromDb.get();
         authorMapper.update(author, request);
         return authorMapper.asOutput(authorRepository.save(author));

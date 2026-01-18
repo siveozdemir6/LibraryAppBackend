@@ -37,15 +37,17 @@ public class CategoryService {
 
         Optional<Category> categoryFromDb = categoryRepository.findById(id);
 
-        Optional<Category> isCategoryExist = categoryRepository.findByName(request.getName());
-
         if (categoryFromDb.isEmpty()) {
             throw new RuntimeException(id + "Güncellemeye çalıştığınız kategori sistemde bulunamadı. !!!.");
         }
 
-        if (isCategoryExist.isPresent()) {
+        Optional<Category> isCategoryExist = categoryRepository.findByName(request.getName());
+
+        // Check if another category (not the current one) has the same name
+        if (isCategoryExist.isPresent() && !isCategoryExist.get().getId().equals(id)) {
             throw new RuntimeException("Bu kategori daha önce sisteme kayıt olmuştur !!!");
         }
+
         request.setId(id);
         return categoryRepository.save(request);
     }

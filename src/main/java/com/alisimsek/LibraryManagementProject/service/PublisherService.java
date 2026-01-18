@@ -41,13 +41,14 @@ public class PublisherService {
 
         Optional<Publisher> publisherFromDb = publisherRepository.findById(id);
 
-        Optional<Publisher> isPublisherExist = publisherRepository.findByNameAndEstablishmentYear(request.getName(), request.getEstablishmentYear());
-
         if (publisherFromDb.isEmpty()) {
             throw new RuntimeException(id + "Güncellemeye çalıştığınız yayın evi sistemde bulunamadı. !!!.");
         }
 
-        if (isPublisherExist.isPresent()) {
+        Optional<Publisher> isPublisherExist = publisherRepository.findByNameAndEstablishmentYear(request.getName(), request.getEstablishmentYear());
+
+        // Check if another publisher (not the current one) has the same name and establishment year
+        if (isPublisherExist.isPresent() && !isPublisherExist.get().getId().equals(id)) {
             throw new RuntimeException("Bu yayın evi daha önce sisteme kayıt olmuştur !!!");
         }
 
